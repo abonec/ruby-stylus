@@ -25,8 +25,17 @@ module Stylus
     # configuration object will be passed along.
     #
     # Returns nothing.
-    config.assets.configure do |env|
-      Stylus.setup(env, config.assets.merge(rails: true))
+    if config.respond_to?(:assets)
+      config.assets.configure do |env|
+        Stylus.setup(env, config.assets.merge(rails: true))
+      end
+    else
+      initializer 'stylus.setup', :after => :append_assets_path, :group => :all do |app|
+        config = app.config.assets
+        if config.enabled
+          Stylus.setup(app.assets, config)
+        end
+      end
     end
   end
 end
